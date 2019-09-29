@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 behave = "*"
+faker = "*"
 
 [packages]
 boto3 = "*"
