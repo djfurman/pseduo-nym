@@ -3,22 +3,26 @@ from faker import Faker
 import os
 import requests
 import json
+import lambda_function
+from http import HTTPStatus
 
 fake = Faker()
 
 
 class LambdaContext:
     function_name = "tokenize"
-    invoked_function_arn = "arn:aws:lambda:us-east-1:123456789012:function:tokenize:stable"
-    aws_request_id = fake.uuid()
+    invoked_function_arn = (
+        "arn:aws:lambda:us-east-1:123456789012:function:tokenize:stable"
+    )
+    aws_request_id = fake.uuid4()
 
 
 def alb_lambda_request(body, tokenize=True):
     return {
         "requestContext": {
             "elb": {
-                "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/lambda-function/1283756ef98735a98",
-            },
+                "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/lambda-function/1283756ef98735a98"
+            }
         },
         "httpMethod": "POST",
         "path": "/tokenize" if tokenize else "/detokenize",
@@ -36,7 +40,7 @@ def build_payload(context):
     }
 
 
-@given(u"a fake person")
+@given("a fake person")
 def create_a_fake_person(context):
     context.person = {
         "name": {
@@ -47,7 +51,7 @@ def create_a_fake_person(context):
     }
 
 
-@given(u"a fake address")
+@given("a fake address")
 def create_a_fake_address(context):
     state_code = fake.state_abbr(include_territories=False)
     context.address = {
@@ -58,17 +62,17 @@ def create_a_fake_address(context):
             else None,
             "city": fake.city(),
             "state_code": state_code,
-            "postal_code": fake.postal_code_in_state(state_abbr=state_code),
+            "postal_code": fake.postalcode_in_state(state_abbr=state_code),
         }
     }
 
 
-@given(u"a fake tax ID")
+@given("a fake tax ID")
 def create_a_fake_tax_id(context):
     context.tax_id = fake.ssn()
 
 
-@when(u"the value is tokenized")
+@when("the value is tokenized")
 def call_the_tokenizer(context):
     body = build_payload(context)
     if os.getenv("CALL_LAMBDA") is not None:
@@ -78,12 +82,15 @@ def call_the_tokenizer(context):
             response = lambda_function.lambda_handler(event, LambdaContext())
 
             context.response_status_code = response["statusCode"]
-            context.response_body = json.loads(response["body"])
+            if context.response_status_code != int(HTTPStatus.NO_CONTENT):
+                context.response_body = json.loads(response["body"])
+            else:
+                context.response_body = None
             context.response_headers = response["headers"]
 
     elif os.getenv("SERVICE_URL") is not None:
         response = requests.post(
-            os.getenv("SERVICE_URL"),
+            f"{os.getenv('SERVICE_URL')}/tokenize",
             headers={"accept": "application/json", "content-type": "application/json"},
             json=context.body,
         )
@@ -96,39 +103,39 @@ def call_the_tokenizer(context):
         raise NotImplementedError("tokenization is not implemented")
 
 
-@then(u"a token should be returned")
+@then("a token should be returned")
 def assert_a_token_was_returned(context):
     assert context.response_body["token"] is not None
     assert len(context.response_body["token"]) == 36
 
 
-@then(u"the information should be stored in the persistance layer")
+@then("the information should be stored in the persistance layer")
 def assert_information_was_stored(context):
     raise NotImplementedError(
-        u"STEP: Then the information should be stored in the persistance layer"
+        "STEP: Then the information should be stored in the persistance layer"
     )
 
 
-@given(u"a token")
+@given("a token")
 def fetch_a_valid_token(context):
-    raise NotImplementedError(u"STEP: Given a token")
+    raise NotImplementedError("STEP: Given a token")
 
 
-@when(u"the value is detokenized")
+@when("the value is detokenized")
 def call_the_detokenizer(context):
-    raise NotImplementedError(u"STEP: When the value is detokenized")
+    raise NotImplementedError("STEP: When the value is detokenized")
 
 
-@then(u"it should return the person")
+@then("it should return the person")
 def assert_person_is_returned(context):
-    raise NotImplementedError(u"STEP: Then it should return the person")
+    raise NotImplementedError("STEP: Then it should return the person")
 
 
-@then(u"the address")
+@then("the address")
 def assert_address_is_returned(context):
-    raise NotImplementedError(u"STEP: Then the address")
+    raise NotImplementedError("STEP: Then the address")
 
 
-@then(u"the tax ID")
+@then("the tax ID")
 def assert_tax_id_is_returned(context):
-    raise NotImplementedError(u"STEP: Then the tax ID")
+    raise NotImplementedError("STEP: Then the tax ID")
