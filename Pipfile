@@ -11,6 +11,7 @@ requests = "*"
 [packages]
 boto3 = "*"
 alb-response = "*"
+moto = "*"
 
 [requires]
 python_version = "3.7"
