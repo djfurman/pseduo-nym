@@ -1,10 +1,13 @@
-from behave import given, when, then
-from faker import Faker
-import os
-import requests
 import json
-import lambda_function
+import os
 from http import HTTPStatus
+
+import requests
+from behave import given, then, when
+from faker import Faker
+from moto import mock_dynamodb
+
+import lambda_function
 
 fake = Faker()
 
@@ -72,6 +75,7 @@ def create_a_fake_tax_id(context):
     context.tax_id = fake.ssn()
 
 
+@mock_dynamodb
 @when("the value is tokenized")
 def call_the_tokenizer(context):
     body = build_payload(context)

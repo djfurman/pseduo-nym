@@ -8,7 +8,7 @@ Feature: It tokenizes human data
     And a fake tax ID
     When the value is tokenized
     Then a token should be returned
-    # And the information should be stored in the persistance layer
+    And the information should be stored in the persistance layer
 
   # Scenario: It detokenizes individual data
   #   Given a token

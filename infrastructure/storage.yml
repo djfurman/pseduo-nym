@@ -1,0 +1,48 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Builds the table structures for the pseduonym microtokenization project"
+Parameters:
+  Environment:
+    Description: Describes the purpose of the enviornment
+    Type: String
+    AllowedValues:
+      - sandbox
+      - staging
+      - prod
+  Maintainer:
+    Description: Identifier to reach the individual responsible for the resource
+    Type: String
+  Project:
+    Description: Links to the project the resources service
+    Type: String
+    Default: pseudonym
+# Mappings:  # Used to handle the
+Resources:
+  PersonTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: person_id
+          AttributeType: 'S'
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: person_id
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
+      TableName:
+        Fn::Join: ['-', ['who-are-you', Ref: Environment]]
+      Tags:
+        - Key: Contact
+          Value:
+            Ref: Maintainer
+        - Key: Project
+          Value:
+            Ref: Project
+        - Key: Purpose
+          Value: Obfuscate personal information to a micro-tokenized framework
+Outputs:
+  Persons:
+    Description: DynamoDB table tokenizing individuals
+    Value:
+      Ref: PersonTable

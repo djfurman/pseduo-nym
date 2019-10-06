@@ -1,4 +1,4 @@
-# pseudo-nym
+# pseudonym
 
 A micro-tokenization setup for human information using AWS DynamoDB
 
@@ -67,8 +67,15 @@ When storing information about humans, security is critical. This play on words 
 
 ```
 
+## Setup
+
+### DynamoDB
+
+Run `aws cloudformation create-stack --stack-name pseudonym --template-url https://djf-pseudonym.s3.amazonaws.com/templates/storage.yml --parameters ParameterKey=Environment,ParameterValue=sandbox ParameterKey=Maintainer,ParameterValue="djfurman@gmail.com" --tags Key=Contact,Value="djfurman@gmail.com" Key=Project,Value=pseudonym Key=Purpose,Value="obfuscate personally identifiable information"`
+
 ## Release Notes
 
 ### v0.0.1
 
 - Initial Setup using DynamoDB for data storage
+- Add CFT file to create DynamoDB table

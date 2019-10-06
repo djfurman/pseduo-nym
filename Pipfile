@@ -12,6 +12,7 @@ requests = "*"
 boto3 = "*"
 alb-response = "*"
 moto = "*"
+geopy = "*"
 
 [requires]
 python_version = "3.7"
